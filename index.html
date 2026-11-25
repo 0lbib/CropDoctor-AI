@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CropDoctor AI | Plant Health Intelligence</title>
+<style>
+
+:root{
+ --bg:#06110d;--panel:rgba(14,34,25,.78);--panel2:#10271c;--line:rgba(164,220,184,.15);
+ --green:#a6ff68;--mint:#62efb0;--lime:#d5ff8f;--white:#f1f8ef;--muted:#9eb7a5;
+ --glow:rgba(142,255,104,.22);--red:#ff8585
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% 5%,#173c29 0,#0a1b13 35%,var(--bg) 75%);color:var(--white);font-family:Inter,"Segoe UI",Arial,sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.14;background-image:linear-gradient(rgba(180,255,200,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(180,255,200,.08) 1px,transparent 1px);background-size:58px 58px;mask-image:linear-gradient(to bottom,black,transparent 78%)}
+body:after{content:"";position:fixed;width:480px;height:480px;right:-220px;top:20%;border-radius:50%;background:#55ed9a;filter:blur(150px);opacity:.10;pointer-events:none;z-index:-1}
+header{height:82px;display:flex;align-items:center;justify-content:space-between;padding:0 6%;border-bottom:1px solid var(--line);background:rgba(5,18,12,.72);backdrop-filter:blur(20px);position:sticky;top:0;z-index:20}
+.brand{display:flex;gap:13px;align-items:center;font-size:19px;font-weight:800;letter-spacing:-.5px}
+.logo{width:43px;height:43px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,var(--lime),var(--mint));color:#092014;font-size:24px;box-shadow:0 0 28px var(--glow)}
+.brand small{display:block;color:#8eaa98;font-size:9px;font-weight:700;letter-spacing:2.1px;margin-top:4px}
+.status{color:var(--green);font-size:11px;letter-spacing:1.5px;font-weight:800}
+main{max-width:1200px;margin:auto;padding:48px 24px 70px}
+.hero{min-height:410px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:20px;position:relative}
+.hero-copy{position:relative;z-index:2;padding:25px 0}
+.eyebrow{color:var(--green);font-size:11px;letter-spacing:3px;font-weight:800;text-transform:uppercase}
+h1{font-size:clamp(42px,6vw,72px);line-height:.98;letter-spacing:-3.5px;margin:18px 0 20px;font-weight:850}
+h1 span{color:var(--green);text-shadow:0 0 35px rgba(166,255,104,.2)}
+.hero-copy>p{max-width:490px;color:var(--muted);line-height:1.8;font-size:15px}
+.hero-note{display:flex;align-items:center;gap:9px;margin-top:25px;color:#c3d8c8;font-size:11px;letter-spacing:.8px}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.7s infinite}
+.leaf-stage{height:400px;position:relative;display:grid;place-items:center;perspective:1000px;isolation:isolate}
+.leaf-stage:before{content:"";position:absolute;width:270px;height:270px;border:1px solid rgba(166,255,104,.18);border-radius:50%;box-shadow:0 0 70px rgba(90,240,145,.08),inset 0 0 60px rgba(90,240,145,.06);animation:orbit 18s linear infinite}
+.leaf-stage:after{content:"";position:absolute;width:340px;height:340px;border:1px dashed rgba(166,255,104,.13);border-radius:50%;animation:orbit 28s linear infinite reverse}
+.orbit-label{position:absolute;right:3%;top:18%;font-size:9px;letter-spacing:2px;color:#8db39a}
+.orbit-label:before{content:"";display:inline-block;width:30px;border-top:1px solid var(--green);vertical-align:middle;margin-right:8px}
+.leaf-3d{width:min(310px,75vw);height:310px;position:relative;z-index:2;transform-style:preserve-3d;animation:leafSpin 12s ease-in-out infinite;filter:drop-shadow(0 25px 32px rgba(0,0,0,.45)) drop-shadow(0 0 32px rgba(91,255,147,.19));transition:transform .15s ease-out;will-change:transform}
+.leaf-3d svg{width:100%;height:100%;overflow:visible}
+.leaf-shadow{position:absolute;width:190px;height:35px;background:#000;filter:blur(22px);opacity:.45;bottom:33px;border-radius:50%}
+.leaf-caption{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:2.5px;color:#85a995;white-space:nowrap}
+.feature-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0 38px}
+.feature{padding:17px 18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,rgba(22,54,37,.68),rgba(9,25,17,.7));backdrop-filter:blur(12px);transition:.3s}
+.feature:hover{transform:translateY(-5px);border-color:rgba(166,255,104,.4);box-shadow:0 14px 35px rgba(0,0,0,.2)}
+.feature-icon{font-size:20px;margin-bottom:9px}.feature strong{display:block;font-size:12px;letter-spacing:.3px}.feature small{display:block;color:var(--muted);font-size:10px;margin-top:5px;line-height:1.5}
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.card{background:linear-gradient(145deg,rgba(17,42,29,.88),rgba(8,25,17,.91));border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,.17);backdrop-filter:blur(16px);transition:transform .3s,border-color .3s,box-shadow .3s}
+.card:hover{border-color:rgba(166,255,104,.3);box-shadow:0 24px 65px rgba(0,0,0,.25)}
+h2{font-size:18px;margin:0 0 8px;letter-spacing:-.4px}
+p{color:var(--muted);line-height:1.7}
+.card>p{font-size:13px}
+.upload{margin-top:20px;border:1px dashed rgba(166,255,104,.38);border-radius:18px;padding:27px 18px;text-align:center;background:rgba(4,19,11,.52);transition:.3s;position:relative;overflow:hidden}
+.upload:hover{border-color:var(--green);background:rgba(23,59,34,.4);transform:translateY(-2px)}
+.upload-icon{font-size:38px;filter:drop-shadow(0 0 15px rgba(166,255,104,.3));animation:bob 3s ease-in-out infinite}
+input[type=file]{display:block;width:100%;margin:18px 0;color:var(--muted);font-size:12px}
+button{border:0;border-radius:12px;padding:13px 19px;font-weight:800;cursor:pointer;background:linear-gradient(110deg,var(--lime),var(--mint));color:#092014;font-size:13px;box-shadow:0 7px 22px rgba(116,255,145,.12);transition:transform .2s,filter .2s,box-shadow .2s}
+button:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.08);box-shadow:0 12px 28px rgba(116,255,145,.22)}
+button:active:not(:disabled){transform:scale(.98)}
+button:disabled{opacity:.55;cursor:wait}
+.secondary{background:rgba(255,255,255,.04);color:var(--white);border:1px solid var(--line);box-shadow:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+.preview{display:none;max-width:100%;max-height:300px;border-radius:13px;margin:18px auto 0;box-shadow:0 12px 30px #0008}
+.result{margin-top:20px;border-top:1px solid var(--line);padding-top:18px}
+.result h3{margin:0 0 8px;font-size:15px}
+.tag{display:inline-block;padding:7px 11px;border-radius:9px;background:rgba(166,255,104,.1);border:1px solid rgba(166,255,104,.18);color:var(--green);font-size:10px;font-weight:800;letter-spacing:1.5px}
+.info{padding:16px;border-radius:14px;background:rgba(4,19,12,.48);border:1px solid rgba(164,220,184,.09);margin-top:13px;transition:.3s;font-size:12px}
+.info:hover{border-color:rgba(166,255,104,.25);transform:translateX(3px)}
+.stat{font-size:25px;font-weight:850;color:var(--green);margin:9px 0;letter-spacing:-.7px}
+.prediction{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(16,39,28,.8);margin-top:12px;animation:rise .5s both}
+.prediction-title{font-weight:700;overflow-wrap:anywhere;font-size:13px}
+.score-row{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:12px}
+.track{height:7px;background:#20392c;border-radius:9px;margin-top:9px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--mint),var(--lime));border-radius:9px;box-shadow:0 0 12px rgba(166,255,104,.35);transform-origin:left;animation:grow 1s ease both}
+footer{text-align:center;padding:25px;color:#718e7e;font-size:10px;letter-spacing:.6px}
+#message{overflow-wrap:anywhere}
+#message.is-scanning{min-height:105px}
+#message.is-scanning:after{content:"";display:block;height:2px;width:100%;margin-top:18px;background:linear-gradient(90deg,transparent,var(--green),transparent);box-shadow:0 0 14px rgba(85,230,165,.65);animation:scan 1.3s ease-in-out infinite}
+@keyframes leafSpin{0%,100%{transform:rotateY(-18deg) rotateX(8deg) rotateZ(-5deg)}50%{transform:rotateY(18deg) rotateX(-8deg) rotateZ(5deg)}}
+@keyframes orbit{to{transform:rotate(360deg)}}@keyframes pulse{50%{opacity:.35;box-shadow:0 0 2px var(--green)}}
+@keyframes bob{50%{transform:translateY(-7px)}}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes scan{50%{transform:scaleX(.45);opacity:.4}}
+@media(max-width:780px){header{height:72px;padding:0 5%}main{padding:30px 16px 50px}.hero{grid-template-columns:1fr;gap:0}.hero-copy{padding:20px 0 0}h1{font-size:48px}.leaf-stage{height:330px}.leaf-3d{width:260px;height:260px}.feature-strip{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.card{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">✳</div>
+    <div>CropDoctor AI<small>PLANT HEALTH INTELLIGENCE</small></div>
+  </div>
+  <div class="status" id="systemStatus">● CONNECTING</div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">✦ INTELLIGENCE FOR EVERY LEAF</div>
+      <h1>Grow smarter.<br><span>Live greener.</span></h1>
+      <p>Meet your plant health co-pilot. Scan a leaf, explore AI predictions, and make more informed crop-care decisions.</p>
+      <div class="hero-note"><span class="pulse-dot"></span> LOCAL AI ENGINE &nbsp;·&nbsp; READY WHEN YOU ARE</div>
+    </div>
+    <div class="leaf-stage" id="leafStage" aria-label="Interactive 3D leaf. Move your mouse to rotate it.">
+      <div class="orbit-label">BIOLOGY MEETS AI</div>
+      <div class="leaf-shadow"></div>
+      <div class="leaf-3d" id="leaf3d">
+        <svg viewBox="0 0 320 320" role="img" aria-label="Emerald green botanical leaf">
+          <defs>
+            <linearGradient id="leafGrad" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#0c5a32"/><stop offset=".38" stop-color="#25a85c"/><stop offset=".72" stop-color="#9dff72"/><stop offset="1" stop-color="#d7ff9c"/></linearGradient>
+            <linearGradient id="leafSide" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#073b25"/><stop offset="1" stop-color="#39d77b"/></linearGradient>
+            <radialGradient id="leafShine" cx=".72" cy=".25" r=".7"><stop stop-color="#efffc0" stop-opacity=".8"/><stop offset="1" stop-color="#efffc0" stop-opacity="0"/></radialGradient>
+            <filter id="leafGlow"><feGaussianBlur stdDeviation="5"/></filter>
+          </defs>
+          <path d="M158 286 C145 245 75 208 55 147 C31 75 93 24 251 24 C281 114 258 215 158 286Z" fill="#69ff9c" opacity=".18" filter="url(#leafGlow)"/>
+          <path d="M158 286 C145 245 75 208 55 147 C31 75 93 24 251 24 C281 114 258 215 158 286Z" fill="url(#leafGrad)" stroke="#baff9a" stroke-opacity=".65" stroke-width="2"/>
+          <path d="M158 286 C145 245 75 208 55 147 C31 75 93 24 251 24 C281 114 258 215 158 286Z" fill="url(#leafShine)"/>
+          <path d="M158 286 C157 222 161 137 251 24" fill="none" stroke="#d8ffb1" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+          <g fill="none" stroke="#c4ff9b" stroke-width="2" stroke-linecap="round" opacity=".68">
+            <path d="M159 248 Q111 198 68 158"/><path d="M160 228 Q213 185 267 139"/>
+            <path d="M160 205 Q111 163 59 119"/><path d="M165 183 Q213 142 260 97"/>
+            <path d="M168 157 Q125 119 78 83"/><path d="M174 131 Q211 94 246 62"/>
+            <path d="M155 266 Q126 239 100 218"/><path d="M158 247 Q206 218 239 188"/>
+          </g>
+          <path d="M158 286 Q151 299 139 309" fill="none" stroke="#8cff9e" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="leaf-caption">MOVE YOUR CURSOR TO INTERACT</div>
+    </div>
+  </section>
+  <section class="feature-strip" aria-label="CropDoctor features">
+    <div class="feature"><div class="feature-icon">◈</div><strong>AI LEAF ANALYSIS</strong><small>Image-based plant disease predictions</small></div>
+    <div class="feature"><div class="feature-icon">⌁</div><strong>INSTANT INSIGHT</strong><small>See ranked model outputs in seconds</small></div>
+    <div class="feature"><div class="feature-icon">✳</div><strong>LOCAL & PRIVATE</strong><small>Your scan is processed by your local server</small></div>
+  </section>
+
+  <div class="layout">
+    <section class="card">
+      <h2>Leaf health scanner</h2>
+      <p>Choose a clear image of a plant leaf to get started.</p>
+
+      <div class="upload">
+        <div class="upload-icon">🌿</div>
+        <strong>Select a leaf image</strong>
+        <p>JPG, PNG or WEBP · Maximum 10 MB</p>
+        <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp">
+        <img id="preview" class="preview" alt="Selected plant leaf preview">
+      </div>
+
+      <div class="actions">
+        <button id="scanBtn" type="button">Analyze leaf</button>
+        <button id="resetBtn" class="secondary" type="button">Reset</button>
+      </div>
+
+      <div id="message" class="result" aria-live="polite">
+        <h3>Ready to scan</h3>
+        <p>Select a leaf image, then press “Analyze leaf”.</p>
+      </div>
+    </section>
+
+    <aside class="card">
+      <span class="tag">SYSTEM STATUS</span>
+      <h2 style="margin-top:18px">Your crop health workspace</h2>
+      <p>Image processing and AI inference run through your local Python backend.</p>
+
+      <div class="info">
+        <div>Backend connection</div>
+        <div class="stat" id="backendStatus">Checking...</div>
+        <p id="backendDetail">Connecting to your local server.</p>
+      </div>
+
+      <div class="info">
+        <strong>Plant disease AI model</strong>
+        <div class="stat" id="modelStatus" style="font-size:20px">Checking...</div>
+        <p id="modelDetail">Checking model availability.</p>
+      </div>
+
+      <div class="info">
+        <strong>Important limitation</strong>
+        <p>This is a research classifier trained on a limited set of plant images. Predictions may be wrong on real-world photos and are not a confirmed diagnosis. Consult an agricultural expert before treatment.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>CropDoctor AI · Local AI development build · Verify predictions before making crop-treatment decisions</footer>
+
+<script>
+const input = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+const message = document.getElementById("message");
+const scanBtn = document.getElementById("scanBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const leafStage = document.getElementById("leafStage");
+const leaf3d = document.getElementById("leaf3d");
+if (leafStage && leaf3d) {
+  const moveLeaf = (x, y) => {
+    const r = leafStage.getBoundingClientRect();
+    const nx = (x - r.left) / r.width - 0.5;
+    const ny = (y - r.top) / r.height - 0.5;
+    leaf3d.style.animation = "none";
+    leaf3d.style.transform = `rotateY(${nx * 58}deg) rotateX(${-ny * 48}deg) rotateZ(${nx * 8}deg)`;
+  };
+  leafStage.addEventListener("pointermove", e => moveLeaf(e.clientX, e.clientY));
+  leafStage.addEventListener("pointerleave", () => {
+    leaf3d.style.animation = "";
+    leaf3d.style.transform = "";
+  });
+}
+
+
+let busy = false;
+
+function escapeText(value) {
+  const div = document.createElement("div");
+  div.textContent = String(value ?? "");
+  return div.innerHTML;
+}
+
+function showMessage(title, detail) {
+  message.replaceChildren();
+
+  const heading = document.createElement("h3");
+  heading.textContent = title;
+  message.appendChild(heading);
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = detail;
+  message.appendChild(paragraph);
+}
+
+input.addEventListener("change", () => {
+  const file = input.files[0];
+  preview.style.display = "none";
+
+  if (!file) return;
+
+  if (file.size > 10 * 1024 * 1024) {
+    input.value = "";
+    showMessage("Image too large", "Please choose an image under 10 MB.");
+    return;
+  }
+
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    input.value = "";
+    showMessage("Unsupported file", "Please choose JPG, PNG or WEBP.");
+    return;
+  }
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  showMessage("Image selected", "Press Analyze leaf to run the AI model.");
+});
+
+async function checkBackend() {
+  const status = document.getElementById("backendStatus");
+  const detail = document.getElementById("backendDetail");
+  const modelStatus = document.getElementById("modelStatus");
+  const modelDetail = document.getElementById("modelDetail");
+  const systemStatus = document.getElementById("systemStatus");
+
+  try {
+    const response = await fetch("/api/health");
+    if (!response.ok) throw new Error("Backend response error");
+
+    const data = await response.json();
+
+    status.textContent = "ONLINE";
+    detail.textContent = "Connected to " + data.app + ".";
+    systemStatus.textContent = "● LOCAL SYSTEM ONLINE";
+
+    const diseaseReady = data.ai_model === "ready";
+    const plantReady = data.plant_identification_model === "ready";
+    modelStatus.textContent = (diseaseReady ? "DISEASE READY" : "DISEASE OFF") +
+      " · " + (plantReady ? "PLANT ID READY" : "PLANT ID OFF");
+    modelDetail.textContent = plantReady
+      ? "Plant identification model loaded. Disease model: " + (diseaseReady ? "ready." : "unavailable.")
+      : "Plant identification model unavailable. Check the Flask terminal.";
+  } catch (error) {
+    status.textContent = "OFFLINE";
+    detail.textContent = "Open this page through http://127.0.0.1:5000.";
+    modelStatus.textContent = "UNKNOWN";
+    modelDetail.textContent = "The backend status could not be checked.";
+    systemStatus.textContent = "● SERVER OFFLINE";
+  }
+}
+
+async function scanLeaf() {
+  if (busy) return;
+
+  const file = input.files[0];
+
+  if (!file) {
+    showMessage("Select an image first", "Choose a plant leaf photo above.");
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    showMessage("Image too large", "Please choose an image under 10 MB.");
+    return;
+  }
+
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    showMessage("Unsupported file", "Please choose JPG, PNG or WEBP.");
+    return;
+  }
+
+  busy = true;
+  scanBtn.disabled = true;
+  resetBtn.disabled = true;
+  scanBtn.textContent = "Analyzing...";
+  showMessage("AI is analyzing your leaf...", "Please wait while the local model processes the image.");
+
+  try {
+    const form = new FormData();
+    form.append("image", file);
+
+    const response = await fetch("/api/scan", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Image analysis failed.");
+    }
+
+    if (!data.success) {
+      throw new Error("The AI could not complete the analysis.");
+    }
+
+    message.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = "AI Analysis Complete ✓";
+    message.appendChild(heading);
+
+    const dimensions = document.createElement("p");
+    dimensions.textContent = "Image size: " + data.width + " × " + data.height + " pixels";
+    message.appendChild(dimensions);
+
+    const plant = data.plant_identification;
+    const plantHeading = document.createElement("h3");
+    plantHeading.style.marginTop = "20px";
+    plantHeading.textContent = "Plant identification";
+    message.appendChild(plantHeading);
+
+    const plantCard = document.createElement("div");
+    plantCard.className = "prediction";
+    const plantName = document.createElement("div");
+    plantName.className = "prediction-title";
+    plantName.textContent = plant && plant.name ? plant.name : "Plant identity uncertain";
+    plantCard.appendChild(plantName);
+
+    const plantInfo = document.createElement("p");
+    plantInfo.textContent = plant && plant.message
+      ? plant.message
+      : "Plant identification model is unavailable.";
+    plantCard.appendChild(plantInfo);
+
+    if (plant && Array.isArray(plant.candidates) && plant.candidates.length) {
+      const candidateTitle = document.createElement("strong");
+      candidateTitle.textContent = "Species candidates";
+      candidateTitle.style.display = "block";
+      candidateTitle.style.marginTop = "12px";
+      plantCard.appendChild(candidateTitle);
+
+      plant.candidates.forEach((candidate, index) => {
+        const row = document.createElement("div");
+        row.className = "score-row";
+        const name = document.createElement("span");
+        name.textContent = (index + 1) + ". " + candidate.name;
+        const score = document.createElement("strong");
+        score.textContent = Number(candidate.score).toFixed(2) + "%";
+        row.append(name, score);
+        plantCard.appendChild(row);
+      });
+    }
+    message.appendChild(plantCard);
+
+    const subheading = document.createElement("h3");
+    subheading.style.marginTop = "20px";
+    subheading.textContent = "Disease predictions";
+    message.appendChild(subheading);
+
+    if (!Array.isArray(data.predictions) || data.predictions.length === 0) {
+      const noDisease = document.createElement("p");
+      noDisease.textContent = data.disease_message || "Disease classifier is unavailable.";
+      message.appendChild(noDisease);
+    }
+
+    (data.predictions || []).forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "prediction";
+
+      const title = document.createElement("div");
+      title.className = "prediction-title";
+      title.textContent = (index + 1) + ". " + String(item.label ?? "Unknown class");
+      card.appendChild(title);
+
+      const score = Number(item.confidence);
+      const validScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
+
+      const row = document.createElement("div");
+      row.className = "score-row";
+
+      const scoreLabel = document.createElement("span");
+      scoreLabel.textContent = "Model score";
+
+      const scoreValue = document.createElement("strong");
+      scoreValue.textContent = Number.isFinite(score) ? score.toFixed(2) + "%" : "Unavailable";
+
+      row.append(scoreLabel, scoreValue);
+      card.appendChild(row);
+
+      const track = document.createElement("div");
+      track.className = "track";
+
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      fill.style.width = validScore + "%";
+
+      track.appendChild(fill);
+      card.appendChild(track);
+      message.appendChild(card);
+    });
+
+    const warning = document.createElement("div");
+    warning.className = "info";
+
+    const warningTitle = document.createElement("strong");
+    warningTitle.textContent = "Important: research predictions only";
+
+    const warningText = document.createElement("p");
+    warningText.textContent =
+      "Model scores are not guaranteed probabilities of disease. The model may misclassify real-world photos. Confirm the result with an agricultural expert before applying treatment.";
+
+    warning.append(warningTitle, warningText);
+    message.appendChild(warning);
+
+  } catch (error) {
+    showMessage("Could not complete AI analysis", error.message || "An unexpected error occurred.");
+  } finally {
+    busy = false;
+    scanBtn.disabled = false;
+    resetBtn.disabled = false;
+    scanBtn.textContent = "Analyze leaf";
+    checkBackend();
+  }
+}
+
+function resetScan() {
+  if (busy) return;
+
+  input.value = "";
+
+  if (preview.src.startsWith("blob:")) {
+    URL.revokeObjectURL(preview.src);
+  }
+
+  preview.removeAttribute("src");
+  preview.style.display = "none";
+  showMessage("Ready to scan", "Select a leaf image, then press Analyze leaf.");
+}
+
+scanBtn.addEventListener("click", scanLeaf);
+resetBtn.addEventListener("click", resetScan);
+
+checkBackend();
+</script>
+</body>
+</html>
